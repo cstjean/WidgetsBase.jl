@@ -35,7 +35,7 @@ end
 function NumberInput(value::Real; kw...)
     attrs = Dict{Symbol, Any}(kw)
     T = numberinput_type(value, attrs)
-    return NumberInput(Observable(convert(T, value)), attrs)
+    return NumberInput{T}(Observable(convert(T, value)), attrs)
 end
 
 struct Slider{T <: AbstractRange, ET} <: AbstractWidget{T}
