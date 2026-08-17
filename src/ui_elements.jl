@@ -19,13 +19,24 @@ function TextField(value::String; kw...)
     TextField(Observable(value), Dict{Symbol, Any}(kw))
 end
 
-struct NumberInput <: AbstractWidget{Float64}
-    value::Observable{Float64}
+struct NumberInput{T <: Real} <: AbstractWidget{T}
+    value::Observable{T}
     attributes::Dict{Symbol, Any}
 end
 
-function NumberInput(value::Float64; kw...)
-    NumberInput(Observable(value), Dict{Symbol, Any}(kw))
+function numberinput_type(value::Real, attrs)
+    T = typeof(value)
+    for key in (:step, :min, :max)
+        attr = get(attrs, key, nothing)
+        attr isa Real && (T = promote_type(T, typeof(attr)))
+    end
+    return T
+end
+
+function NumberInput(value::Real; kw...)
+    attrs = Dict{Symbol, Any}(kw)
+    T = numberinput_type(value, attrs)
+    return NumberInput(Observable(convert(T, value)), attrs)
 end
 
 struct Slider{T <: AbstractRange, ET} <: AbstractWidget{T}
