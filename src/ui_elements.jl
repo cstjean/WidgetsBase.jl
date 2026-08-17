@@ -24,8 +24,24 @@ struct NumberInput <: AbstractWidget{Float64}
     attributes::Dict{Symbol, Any}
 end
 
+const NUMBERINPUT_INTEGER_DISPLAY_KEY = :bonito_integer_display
+
+numberinput_float_attribute(value::AbstractFloat) = true
+numberinput_float_attribute(value::Observable) = numberinput_float_attribute(value[])
+numberinput_float_attribute(value) = false
+
+function numberinput_prefers_float_display(value, attrs)
+    isinteger(value) || return true
+    haskey(attrs, :step) && numberinput_float_attribute(attrs[:step]) && return true
+    haskey(attrs, :min) && numberinput_float_attribute(attrs[:min]) && return true
+    haskey(attrs, :max) && numberinput_float_attribute(attrs[:max]) && return true
+    return false
+end
+
 function NumberInput(value::Float64; kw...)
-    NumberInput(Observable(value), Dict{Symbol, Any}(kw))
+    attrs = Dict{Symbol, Any}(kw)
+    attrs[NUMBERINPUT_INTEGER_DISPLAY_KEY] = !numberinput_prefers_float_display(value, attrs)
+    return NumberInput(Observable(value), attrs)
 end
 
 struct Slider{T <: AbstractRange, ET} <: AbstractWidget{T}
