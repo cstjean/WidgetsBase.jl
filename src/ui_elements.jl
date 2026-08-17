@@ -25,12 +25,11 @@ struct NumberInput{T <: Real} <: AbstractWidget{T}
 end
 
 function numberinput_type(value::Real, attrs)
-    T = typeof(value)
-    for key in (:step, :min, :max)
-        attr = get(attrs, key, nothing)
-        attr isa Real && (T = promote_type(T, typeof(attr)))
+    attr_type(key) = begin
+        attr = get(attrs, key, value)
+        typeof(attr isa Real ? attr : value)
     end
-    return T
+    return promote_type(typeof(value), attr_type(:step), attr_type(:min), attr_type(:max))
 end
 
 function NumberInput(value::Real; kw...)
